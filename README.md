@@ -25,6 +25,7 @@ python -m zsbench route "summarize the README in this repo" --context "user: hi"
 - **Every decision logs** its label, ok, latency_ms, attempts, model and wording_version.
 - **Latency:** 0.6–2.7 s per call in the live smoke test, with a 15 s timeout and 1 retry.
 - **Overrides:** `ROUTER_MODEL`, `ROUTER_URL` and `ROUTER_EXTRA` in `.env`.
+- **Training data:** to use real agent runs as training data later, log them in the format in [docs/trace-logging.md](docs/trace-logging.md). It covers what the harness writes per decision, and shadow mode for comparing the router against the agent.
 
 ## The benchmark harness
 

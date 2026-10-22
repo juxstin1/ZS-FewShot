@@ -10,6 +10,9 @@
   - nothing yet
 
   Training is only worth it for a small local model, and only on traces from that agent.
+- **[2026-10-22] Direction:** Justin will generate traces with his own agent harness at home.
+  - Logging spec: `docs/trace-logging.md` (JSONL `decision` + `run_end` records, shadow-mode router).
+  - Next code: a trace-to-zsbench converter, plus per-row options if the tool menu varies per step.
 - **[2026-10-22] Free decision models scored** (details and table in `docs/jev-landscape.md`, "Measured on our data"):
 
   | backend | our test (n=27) | BFCL mapped (n=224) | p50 latency |
