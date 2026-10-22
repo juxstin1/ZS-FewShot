@@ -2,7 +2,14 @@
 
 [2026-10-22]
 
-- **Branch:** none (not a git repo yet)
+- **Repo:** https://github.com/juxstin1/ZS-FewShot (private), branch `main`.
+  - Not in git: `.env` (keys), `.venv/`, and `servers/` (model servers and weights). Rebuild them from the README.
+- **Open decision:** what the router plugs into. Options:
+  - an existing agent: swap the labels for its real tools, and feed it task + history + observation
+  - a small demo agent
+  - nothing yet
+
+  Training is only worth it for a small local model, and only on traces from that agent.
 - **[2026-10-22] Free decision models scored** (details and table in `docs/jev-landscape.md`, "Measured on our data"):
 
   | backend | our test (n=27) | BFCL mapped (n=224) | p50 latency |
