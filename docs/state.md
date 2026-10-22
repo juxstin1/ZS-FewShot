@@ -11,12 +11,14 @@
 
   Training is only worth it for a small local model, and only on traces from that agent.
 - **[2026-10-22] Direction:** Justin will generate traces with his own agent harness at home.
-  - Logging spec v2: `docs/trace-logging.md`.
-    - JSONL `decision` + `run_end` records.
-    - Runs are trees: `step_id`, `parent_step_id` and `compacted_before`, and state comes only from what the model saw at that step.
-    - `result_used_later` gates teacher labels from successful runs.
-    - `outcome` is success, fail, timeout or error_not_model; error_not_model runs are excluded everywhere.
-    - Shadow-mode router.
+  - Logging spec v3 (simplified 2026-10-22): `docs/trace-logging.md`. Three files:
+    - `tools.json`: the menu, once.
+    - `steps.jsonl`: run, step, parent, compacted, context (exactly what the model saw), tools, chose, and an optional router pick.
+    - `runs.jsonl`: run, task, model, outcome, plus optional score, used and wrong.
+  - Labels:
+    - Successful-run steps listed in `used` become training data.
+    - Other steps go to blind checking.
+    - `error_not_model` runs are dropped.
   - Next code: a trace-to-zsbench converter, plus per-row options if the tool menu varies per step.
 - **[2026-10-22] Free decision models scored** (details and table in `docs/jev-landscape.md`, "Measured on our data"):
 
