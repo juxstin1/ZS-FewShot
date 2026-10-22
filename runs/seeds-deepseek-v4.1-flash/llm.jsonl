@@ -1,0 +1,22 @@
+{"id": "seed-01", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 554.0143999969587}
+{"id": "seed-02", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 604.5862999744713}
+{"id": "seed-03", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 540.8504999941215}
+{"id": "seed-04", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 562.1093999361619}
+{"id": "seed-05", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 1212.35330007039}
+{"id": "seed-06", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 1217.875099973753}
+{"id": "seed-07", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 478.1473999610171}
+{"id": "seed-08", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 606.4658000832424}
+{"id": "seed-09", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 684.7319001099095}
+{"id": "seed-10", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 539.3615000648424}
+{"id": "seed-11", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 1208.0605000955984}
+{"id": "seed-12", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 540.1854000519961}
+{"id": "seed-13", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 4659.945700084791}
+{"id": "seed-14", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 3581.076900009066}
+{"id": "seed-15", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 513.8741000555456}
+{"id": "seed-16", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 523.0298000387847}
+{"id": "seed-17", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 474.19829992577434}
+{"id": "seed-18", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 500.2836000639945}
+{"id": "seed-19", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 472.47369994875044}
+{"id": "seed-20", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 1631.5470999106765}
+{"id": "seed-21", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 642.065400024876}
+{"id": "seed-22", "gold": "read_file", "accepted": ["read_file", "web_search"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 615.0600000983104}

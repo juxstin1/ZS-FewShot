@@ -1,0 +1,42 @@
+{"id": "seed-01", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 675.4916999489069}
+{"id": "seed-02", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 564.4947000546381}
+{"id": "seed-03", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 754.8780998913571}
+{"id": "seed-04", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 687.5962000340223}
+{"id": "seed-05", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 475.30429996550083}
+{"id": "seed-06", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 1076.7044000094756}
+{"id": "seed-07", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 523.3302999986336}
+{"id": "seed-08", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 455.36319992970675}
+{"id": "seed-09", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 491.7256000917405}
+{"id": "seed-10", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 422.2969999536872}
+{"id": "seed-11", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 492.7035999717191}
+{"id": "seed-12", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 1284.7568000433967}
+{"id": "seed-13", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 1548.87709999457}
+{"id": "seed-14", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 1429.0452999994159}
+{"id": "seed-15", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 529.6999999554828}
+{"id": "seed-16", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 529.8338999273255}
+{"id": "seed-17", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 472.7003000443801}
+{"id": "seed-18", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 956.3617999665439}
+{"id": "seed-19", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 647.073799977079}
+{"id": "seed-20", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 575.9629000676796}
+{"id": "seed-21", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 522.9202999034896}
+{"id": "seed-22", "gold": "read_file", "accepted": ["read_file", "web_search"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 1353.5386000294238}
+{"id": "9979e8ef4c0c", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 747.840499971062}
+{"id": "e23886445100", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 653.7140000145882}
+{"id": "c58ce9814d93", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 963.7774000875652}
+{"id": "60da449fa54b", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 767.1285000396892}
+{"id": "aedcd907da51", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 475.52910004742444}
+{"id": "81dc6111fe12", "gold": "run_code", "accepted": ["run_code"], "pred": "run_code", "confidence": null, "probs": null, "latency_ms": 700.7173999445513}
+{"id": "54ff38659111", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 635.1618999615312}
+{"id": "710ed54956bd", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 2106.631900067441}
+{"id": "bc2bfc37fbef", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 752.6586999883875}
+{"id": "a48b0535ff4e", "gold": "run_code", "accepted": ["run_code"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 616.5777000132948}
+{"id": "af85a8dae187", "gold": "read_file", "accepted": ["read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 557.6704000122845}
+{"id": "d8e9f3891c58", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 815.219399984926}
+{"id": "ae67923c5f2b", "gold": "web_search", "accepted": ["web_search"], "pred": "web_search", "confidence": null, "probs": null, "latency_ms": 814.8408000124618}
+{"id": "717a728439dd", "gold": "read_file", "accepted": ["read_file", "run_code"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 596.6285000322387}
+{"id": "20674b73879d", "gold": "web_search", "accepted": ["web_search", "read_file"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 622.9454000713304}
+{"id": "450402902642", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 622.6071999408305}
+{"id": "7bcc8629f5d9", "gold": "run_code", "accepted": ["run_code"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 738.3203000063077}
+{"id": "d4e0c47ecd3e", "gold": "answer_directly", "accepted": ["answer_directly"], "pred": "answer_directly", "confidence": null, "probs": null, "latency_ms": 1968.6482000397518}
+{"id": "0abc8f829b34", "gold": "ask_user", "accepted": ["ask_user"], "pred": "ask_user", "confidence": null, "probs": null, "latency_ms": 563.3496000664309}
+{"id": "09d3a9d022c6", "gold": "run_code", "accepted": ["run_code"], "pred": "read_file", "confidence": null, "probs": null, "latency_ms": 637.1573000214994}

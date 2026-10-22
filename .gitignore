@@ -1,0 +1,9 @@
+# Secrets: API keys live only in .env
+.env
+
+# Local environments and model servers (multi-GB; rebuild from README)
+.venv/
+servers/
+
+__pycache__/
+*.pyc

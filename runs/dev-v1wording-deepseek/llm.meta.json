@@ -1,0 +1,17 @@
+{
+  "backend": "llm",
+  "task": "tool_router",
+  "labels": [
+    "answer_directly",
+    "web_search",
+    "read_file",
+    "run_code",
+    "ask_user"
+  ],
+  "split": "dev",
+  "n": 15,
+  "finished": "2026-10-22T14:19:49",
+  "url": "https://api.deepinfra.com/v1/openai",
+  "model": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "extra": {}
+}

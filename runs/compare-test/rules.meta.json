@@ -1,0 +1,16 @@
+{
+  "backend": "rules",
+  "task": "tool_router",
+  "labels": [
+    "answer_directly",
+    "web_search",
+    "read_file",
+    "run_code",
+    "ask_user"
+  ],
+  "split": "test",
+  "n": 27,
+  "finished": "2026-10-22T14:31:35",
+  "rules": 5,
+  "default_label": "answer_directly"
+}

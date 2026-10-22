@@ -1,0 +1,17 @@
+{
+  "backend": "intern",
+  "task": "tool_router",
+  "labels": [
+    "answer_directly",
+    "web_search",
+    "read_file",
+    "run_code",
+    "ask_user"
+  ],
+  "split": "test",
+  "n": 27,
+  "finished": "2026-10-22T14:37:14",
+  "url": "http://127.0.0.1:8010",
+  "model": "intern",
+  "orders": 5
+}

@@ -1,0 +1,35 @@
+{
+  "name": "tool_router",
+  "wording_version": "v1",
+  "question": "An AI agent just received the user request below. Which single next action should the agent take?",
+  "labels": {
+    "answer_directly": "Stable general knowledge, reasoning, advice or writing help that would be just as correct a year from now, using only what's in the conversation. Pick this over ask_user when a useful answer is possible with a stated assumption.",
+    "web_search": "Needs facts that change over time or must be looked up: news, prices, releases and versions, schedules, a specific company's policies or practices, statistics or salary data, or anything asked about as 'latest', 'current' or 'now'.",
+    "read_file": "Needs a local file, log, repo or document the user referred to, and reading it is the answer: summarize, explain, quote, or look up a setting, value or matching entries. If the answer needs math or processing over the contents, or running, measuring or changing the file, choose run_code instead.",
+    "run_code": "Needs a calculation or code. Any math with specific numbers goes here, even if it is short enough to do in your head (percentages, totals, averages, date differences, including over a file's contents), and so does executing, measuring or changing a file the user points to (running a script or tests, measuring audio, editing a mix).",
+    "ask_user": "Can't act without information only the user has: what 'it' or 'that' refers to, which file or item, or a missing detail that changes the whole answer. Not for requests where a useful answer is possible with a stated assumption."
+  },
+  "rules": [
+    {
+      "label": "run_code",
+      "patterns": ["\\b(calculate|compute|average|sum of|total of)\\b"]
+    },
+    {
+      "label": "read_file",
+      "patterns": ["\\b[\\w./\\\\-]+\\.(py|ts|js|md|ya?ml|json|log|txt|csv|toml)\\b", "\\b(readme|this repo|the codebase|the file)\\b"]
+    },
+    {
+      "label": "web_search",
+      "patterns": ["\\b(latest|news|today|this (week|month|year)|current(ly)?|price|reviews?|who won)\\b"]
+    },
+    {
+      "label": "run_code",
+      "patterns": ["\\b(run|execute|calculate|compute|benchmark|how many days)\\b", "\\d+\\s*%", "\\bgenerate \\d+\\b"]
+    },
+    {
+      "label": "ask_user",
+      "patterns": ["^\\W*\\w+(\\s+\\w+){0,3}\\W*$"]
+    }
+  ],
+  "default_label": "answer_directly"
+}
