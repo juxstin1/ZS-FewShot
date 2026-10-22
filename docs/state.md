@@ -11,12 +11,11 @@
 
   Training is only worth it for a small local model, and only on traces from that agent.
 - **[2026-10-22] Direction:** Justin will generate traces with his own agent harness at home.
-  - Logging spec v3 (simplified 2026-10-22): `docs/trace-logging.md`. Three files:
-    - `tools.json`: the menu, once.
-    - `steps.jsonl`: run, step, parent, compacted, context (exactly what the model saw), tools, chose, and an optional router pick.
-    - `runs.jsonl`: run, task, model, outcome, plus optional score, used and wrong.
+  - Logging spec v2: `docs/trace-logging.md`, rewritten 2026-10-22 as typed schemas with examples.
+    - The v3 field cuts were reverted; Justin wanted the doc clearer, not fewer fields.
+    - One JSONL file per day, with `decision` lines (run/step tree, compaction flag, exact context, options, chosen, router) and `run_end` lines (outcome, bad_steps, result_used_later).
   - Labels:
-    - Successful-run steps listed in `used` become training data.
+    - Successful-run steps whose result was used later become training data.
     - Other steps go to blind checking.
     - `error_not_model` runs are dropped.
   - Next code: a trace-to-zsbench converter, plus per-row options if the tool menu varies per step.
