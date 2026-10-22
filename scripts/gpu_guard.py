@@ -1,5 +1,8 @@
 """Keep benchmark model servers from interfering with PROD workloads on the shared GPU.
 
+LOCKED OUT (2026-10-22): this machine's GPU serves PROD (AURA), so `launch` refuses to start anything
+while LOCKOUT is set. Lifting it is a deliberate edit here, on a GPU without PROD, not a flag.
+
   check   preflight only: is there room for a model of --need-gb while leaving --reserve-gb free?
   launch  preflight, then run a module or script in this same Python process with
           - a hard VRAM cap (torch per-process memory fraction), so the server can't grow into PROD's memory
@@ -10,7 +13,7 @@ Examples (run with the venv that has the server's torch); any arguments gpu_guar
   servers/kev/.venv/Scripts/python.exe scripts/gpu_guard.py launch --need-gb 11 --module kev.serve --run jaredpalmer/kev-4b --port 8009
   servers/intern-venv/Scripts/python.exe scripts/gpu_guard.py launch --need-gb 11 --script scripts/intern_server.py servers/intern-decision-4b --port 8010
 
-Exit codes: 0 ok, 2 preflight refused, 3 watchdog stopped the server.
+Exit codes: 0 ok, 2 preflight refused, 3 watchdog stopped the server, 4 locked out.
 """
 
 import argparse
@@ -22,6 +25,11 @@ import threading
 import time
 
 GB = 1024  # nvidia-smi reports MiB
+
+LOCKOUT = (
+    "local model servers are locked out on this machine: its GPU serves PROD (AURA). The router runs on "
+    "DeepSeek via API. See README, 'Model servers: local GPU locked out'."
+)
 
 
 def gpu_state(index: int = 0) -> dict:
@@ -86,6 +94,9 @@ def main() -> int:
             target.add_argument("--module", help="run this module as __main__ (like python -m)")
             target.add_argument("--script", help="run this script as __main__")
     args, rest = parser.parse_known_args()
+    if args.cmd == "launch" and LOCKOUT:
+        print(f"gpu_guard: REFUSED: {LOCKOUT}", file=sys.stderr, flush=True)
+        return 4
     if args.cmd == "check" and rest:
         parser.error(f"unrecognized arguments: {' '.join(rest)}")
     rest = rest[1:] if rest[:1] == ["--"] else rest

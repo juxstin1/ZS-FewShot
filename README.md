@@ -34,7 +34,7 @@ Baseline harness for one agent decision. It compares three ways of making the sa
 | backend | what it is |
 |---|---|
 | `rules` | Regex rules from `task.json`. The first rule that matches wins. |
-| `jev` | [Simple Jev](https://github.com/featherless-ai/simple-jev) on a local Qwen. It scores each label from next-token logits, with no generation. |
+| `jev` | Any Jev System One server ([Simple Jev](https://github.com/featherless-ai/simple-jev), Kev, Intern-Decision). It scores each label from next-token logits, with no generation. Never run locally here; see the lockout below. |
 | `llm` | The same Qwen on vLLM, generating `{"label": ...}` under a JSON schema. |
 
 `jev` and `llm` use the same model on purpose. The gap between them is the effect of scoring labels instead of generating them.
@@ -144,75 +144,16 @@ uv pip install --python .venv/Scripts/python.exe -r requirements.txt
 
 Both commands resume where they left off. `teacher.jsonl` rows record each model's vote and whether agreement was unanimous or tiebreak, so you can filter stricter later.
 
-## Serve the models (WSL Ubuntu, RTX 4090)
+## Model servers: local GPU locked out
 
-Run one server at a time. Two 4B models plus the KV cache are tight on 24 GB, and about 6 GB is already in use.
+**[2026-10-22] No local model servers on this machine's GPU.** It runs PROD (AURA). That covers Simple Jev, vLLM, Kev and Intern-Decision.
 
-Simple Jev needs Python 3.12+ and a CUDA build of PyTorch. It listens on 127.0.0.1:8000:
-
-```bash
-git clone https://github.com/featherless-ai/simple-jev.git && cd simple-jev
-python3.12 -m venv .venv && source .venv/bin/activate
-python -m pip install -e ./hf-server
-python hf-server/hf_server.py --model Qwen/Qwen3.5-4B --device auto --dtype bfloat16 --max-model-len 4096
-```
-
-vLLM for the `llm` baseline, on port 8001:
-
-```bash
-vllm serve Qwen/Qwen3.5-4B --port 8001 --max-model-len 4096 --gpu-memory-utilization 0.6
-```
-
-If Windows can't reach a server running in WSL, run the harness from WSL too. It's plain Python.
-
-### Free decision models (Kev, Intern-Decision) on Windows
-
-Any server that speaks the Jev System One API (`POST /v1/systemone`) can be scored as its own backend with `--jev-server NAME=URL[,MODEL]`. Both servers below live in `servers/` (gitignored) and use CUDA PyTorch.
-
-**This GPU also runs PROD (AURA), so always start servers through `scripts/gpu_guard.py launch`:**
-
-- It refuses to start unless free VRAM minus the model's need still leaves `--reserve-gb` (default 4) for PROD, and the GPU is under `--max-util` (default 60%).
-- It caps the server's VRAM at `--cap-gb`.
-- It runs a watchdog that kills the server the moment free VRAM drops under `--min-free-gb` (default 2).
-- Run one model at a time; both 4B models at once don't fit with the reserve.
-- To check without launching: `python scripts/gpu_guard.py check --need-gb 11`.
-
-**Kev-4B** ([jaredpalmer/kev](https://github.com/jaredpalmer/kev), Apache-2.0), on port 8009. Set it up:
-
-```bash
-cd servers && git clone https://github.com/jaredpalmer/kev.git && cd kev
-uv sync --extra serve
-uv pip install --python .venv/Scripts/python.exe "torch>=2.6,<2.9" --index-url https://download.pytorch.org/whl/cu128 --reinstall-package torch
-```
-
-Then serve it, from `servers/kev`:
-
-```bash
-.venv/Scripts/python.exe ../../scripts/gpu_guard.py launch --need-gb 11 --module kev.serve --run jaredpalmer/kev-4b --port 8009 --device cuda
-```
-
-**Intern-Decision-4B** ([internlm/Intern-Decision-4B](https://huggingface.co/internlm/Intern-Decision-4B), Apache-2.0), on port 8010. It ships a Python engine but no server, so `scripts/intern_server.py` wraps it. Set it up:
-
-```bash
-cd servers && uvx --from huggingface_hub hf download internlm/Intern-Decision-4B --local-dir intern-decision-4b
-uv venv intern-venv --python 3.12
-uv pip install --python intern-venv/Scripts/python.exe torch==2.9.1 torchvision==0.24.1 --index-url https://download.pytorch.org/whl/cu128
-uv pip install --python intern-venv/Scripts/python.exe transformers==5.14.1 Pillow accelerate
-```
-
-Then serve it from the repo root:
-
-```bash
-servers/intern-venv/Scripts/python.exe scripts/gpu_guard.py launch --need-gb 11 --script scripts/intern_server.py servers/intern-decision-4b --port 8010
-```
-
-Score them:
-
-```bash
-python -m zsbench run tasks/tool_router --split test --backends kev,intern --jev-server kev=http://127.0.0.1:8009,kev-latest --jev-server intern=http://127.0.0.1:8010 --out runs/compare-test
-```
-
-Run one server at a time if VRAM is tight; reusing `--out` merges results into one report.
+- The router is DeepSeek V4.1 Flash via API.
+- The comparison that needed local models is finished; results are in [docs/jev-landscape.md](docs/jev-landscape.md).
+- **The launch commands were removed from this README on purpose.** They're in git history (commit `1b3edb3`) for use on a different machine.
+- `scripts/gpu_guard.py launch` refuses to start anything (exit 4), and so does `scripts/intern_server.py`. `gpu_guard.py check` still reports VRAM.
+- Lifting the lockout is a deliberate code edit (`LOCKOUT` in `scripts/gpu_guard.py`), on a GPU that doesn't serve PROD. It's not a flag.
+- A System One server running somewhere else can still be scored: `--jev-server NAME=URL[,MODEL]` (or `--jev-url`) points the harness at it.
 
 ### BFCL routing set (second test set)
 
@@ -241,20 +182,19 @@ How the settings resolve:
 - `python -m zsbench` reads `.env` on startup.
 - Real environment variables win over `.env`, and CLI flags win over both.
 - The keys are `LLM_API_KEY`, `LLM_URL`, `LLM_MODEL` and `LLM_EXTRA`.
-- To go back to local vLLM, comment out `LLM_URL`, `LLM_MODEL` and `LLM_EXTRA`.
 
 ## Run
 
-Start with the Simple Jev server up:
+The `llm` backend calls DeepSeek on DeepInfra (settings in `.env`, see above). No local server is involved:
 
 ```bash
-python -m zsbench run tasks/tool_router --backends rules,jev --out runs/qwen35-4b
+python -m zsbench run tasks/tool_router --backends rules,llm --out runs/<name>
 ```
 
-Then stop Simple Jev, start vLLM, and add its results to the same run folder:
+To add a remote System One server's results to the same folder:
 
 ```bash
-python -m zsbench run tasks/tool_router --backends llm --out runs/qwen35-4b
+python -m zsbench run tasks/tool_router --backends remote --jev-server remote=https://<host> --out runs/<name>
 ```
 
 Each run prints the comparison table and writes `runs/<name>/report.md`, which includes per-label F1 and confusion matrices. A backend whose server is down is skipped and the run exits 1.

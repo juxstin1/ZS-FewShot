@@ -11,7 +11,12 @@
 
   Training is only worth it for a small local model, and only on traces from that agent.
 - **[2026-10-22] Direction:** Justin will generate traces with his own agent harness at home.
-  - Logging spec: `docs/trace-logging.md` (JSONL `decision` + `run_end` records, shadow-mode router).
+  - Logging spec v2: `docs/trace-logging.md`.
+    - JSONL `decision` + `run_end` records.
+    - Runs are trees: `step_id`, `parent_step_id` and `compacted_before`, and state comes only from what the model saw at that step.
+    - `result_used_later` gates teacher labels from successful runs.
+    - `outcome` is success, fail, timeout or error_not_model; error_not_model runs are excluded everywhere.
+    - Shadow-mode router.
   - Next code: a trace-to-zsbench converter, plus per-row options if the tool menu varies per step.
 - **[2026-10-22] Free decision models scored** (details and table in `docs/jev-landscape.md`, "Measured on our data"):
 
@@ -23,7 +28,10 @@
   | rules | 55.6% | 46.0% | – |
 
   - Local models need label-order averaging (asked once, Intern scores 67% on test).
-  - Servers live in `servers/` (gitignored). Always launch them through `scripts/gpu_guard.py`, because the GPU is shared with PROD AURA.
+  - **[2026-10-22] Local model servers are LOCKED OUT on this machine** (its GPU serves PROD AURA).
+    - `gpu_guard.py launch` exits 4, and `intern_server.py` refuses to start.
+    - The README launch commands are removed; they're in git history at `1b3edb3`.
+    - The `servers/` folder stays on disk but unused.
   - WSL has no network (mirrored mode, no route), so everything runs on Windows. Kev needs `HF_HUB_DISABLE_SYMLINKS=1` and `KEV_CUDA_GRAPHS=0`.
 - **BFCL set:** `tasks/tool_router_bfcl/` holds 224 of 250 rows, mapped by `scripts/map_bfcl.py` (rules, not hand-checked).
 - **Report:** test-only runs now hide confusion matrices too.

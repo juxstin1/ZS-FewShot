@@ -33,5 +33,23 @@ class PreflightTest(unittest.TestCase):
         self.assertIn("busy", report)
 
 
+class LockoutTest(unittest.TestCase):
+    def test_launch_is_refused_before_touching_the_gpu(self):
+        argv = ["gpu_guard.py", "launch", "--need-gb", "1", "--script", "server.py"]
+        with mock.patch.object(gpu_guard.sys, "argv", argv), \
+                mock.patch.object(gpu_guard, "gpu_state", side_effect=AssertionError("GPU queried")), \
+                mock.patch.object(gpu_guard, "cap_torch", side_effect=AssertionError("torch touched")), \
+                mock.patch("sys.stderr"):
+            self.assertEqual(gpu_guard.main(), 4)
+
+    def test_lockout_is_on(self):
+        self.assertTrue(gpu_guard.LOCKOUT)
+
+    def test_check_still_works(self):
+        with mock.patch.object(gpu_guard.sys, "argv", ["gpu_guard.py", "check", "--need-gb", "1"]), \
+                mock.patch.object(gpu_guard, "gpu_state", return_value=state(5, 18)), mock.patch("builtins.print"):
+            self.assertEqual(gpu_guard.main(), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

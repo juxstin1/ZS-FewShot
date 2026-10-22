@@ -23,6 +23,12 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     args = parser.parse_args()
 
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from gpu_guard import LOCKOUT  # noqa: E402 - same scripts/ folder
+
+    if LOCKOUT:
+        sys.exit(f"intern_server: REFUSED: {LOCKOUT}")
+
     model_dir = Path(args.model_dir).resolve()
     sys.path.insert(0, str(model_dir))
     from inference import DecisionEngine  # noqa: E402 - lives in the model repo
