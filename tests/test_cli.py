@@ -269,6 +269,43 @@ class CliTest(unittest.TestCase):
             self.assertIn("| rules | - | 2 |", out)
             self.assertIn("split: test", (Path(tmp) / "run" / "report.md").read_text(encoding="utf-8"))
 
+    def test_prompts_then_collected_replies_score_as_a_backend(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            task_dir = Path(tmp) / "t"
+            task_dir.mkdir()
+            (task_dir / "task.json").write_text(json.dumps({
+                "name": "t", "question": "q?", "labels": {"yes": "y", "no": "n"},
+            }), encoding="utf-8")
+            (task_dir / "gold.jsonl").write_text("".join(json.dumps(r) + "\n" for r in [
+                {"id": "1", "text": "a", "label": "yes", "split": "dev"},
+                {"id": "2", "text": "b", "label": "no", "split": "dev", "context": ["assistant: sure?"]},
+                {"id": "3", "text": "c", "label": "yes", "split": "dev"},
+                {"id": "4", "text": "d", "label": "no", "split": "test"},
+            ]), encoding="utf-8")
+            prompts = Path(tmp) / "snap" / "dev.jsonl"
+            self.assertEqual(quiet(["prompts", str(task_dir), "--split", "dev", "--out", str(prompts)])[0], 0)
+            self.assertEqual(quiet(["prompts", str(task_dir), "--out", str(prompts)])[0], 1)  # never overwrites
+
+            lines = [json.loads(line) for line in prompts.read_text(encoding="utf-8").splitlines()]
+            self.assertEqual([line["id"] for line in lines], ["1", "2", "3"])
+            self.assertNotIn("label", lines[0])  # the collector never sees gold
+            self.assertIn("- yes: y", lines[1]["prompt"])
+            self.assertIn("Previous turns:\n- assistant: sure?", lines[1]["prompt"])
+            for line, reply in zip(lines, ["Yes", "**no**", None]):  # row 3 left unanswered
+                line["reply"] = reply
+            lines[0]["latency_ms"] = 900
+            prompts.write_text("".join(json.dumps(line) + "\n" for line in lines), encoding="utf-8")
+
+            run = Path(tmp) / "run"
+            code, out, _ = quiet(["run", str(task_dir), "--backends", "snap", "--split", "dev",
+                                  "--answers", f"snap={prompts},snapchat-my-ai", "--out", str(run)])
+            self.assertEqual(code, 0)
+            preds = [json.loads(line) for line in (run / "snap.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual([p["pred"] for p in preds], ["yes", "no", None])
+            self.assertEqual([p["latency_ms"] for p in preds], [900, None, None])
+            self.assertEqual(json.loads((run / "snap.meta.json").read_text(encoding="utf-8"))["model"], "snapchat-my-ai")
+            self.assertIn("| snap | snapchat-my-ai | 3 |", out)
+
 
 if __name__ == "__main__":
     unittest.main()

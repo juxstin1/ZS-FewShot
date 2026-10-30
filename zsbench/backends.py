@@ -1,15 +1,45 @@
-"""The three baselines. Each predict(text, context) returns {"pred", "confidence"?, "probs"?, "extra"?}.
+"""The baselines. Each predict(text, context) returns {"pred", "confidence"?, "probs"?, "latency_ms"?, "extra"?}.
 
 context is the earlier conversation turns (oldest first), or an empty list for a first message.
 pred is None when a backend produced no valid label (parse failure, server error).
+latency_ms, when present, replaces the harness's own timing (replies collected elsewhere).
 """
 
 import json
 import re
 import urllib.error
 import urllib.request
+from pathlib import Path
 
-from .task import Task
+from .task import Task, read_jsonl, row_key
+
+
+def menu_prompt(task: Task) -> str:
+    """The question plus every allowed label with its description."""
+    label_lines = "\n".join(f"- {label}: {desc}" for label, desc in task.labels.items())
+    return f"{task.question}\n\nAllowed labels:\n{label_lines}"
+
+
+def request_text(text: str, context: list[str] | None) -> str:
+    if not context:
+        return text
+    turns = "\n".join(f"- {turn}" for turn in context)
+    return f"Previous turns:\n{turns}\n\nCurrent request:\n{text}"
+
+
+def chat_prompt(task: Task, text: str, context: list[str] | None = None) -> str:
+    """One self-contained message for a chat app (e.g. Snapchat My AI). The full label menu goes
+    in every message: chat bots drift from options given earlier in the thread."""
+    body = request_text(text, context) if context else f"Current request:\n{text}"
+    return f"{menu_prompt(task)}\n\n{body}\n\nReply with only the label, nothing else."
+
+
+def parse_label(reply: str, labels) -> str | None:
+    """The one allowed label a free-text reply names, or None if it names none or several.
+    Case, quotes, backticks, and spaces or hyphens for underscores ("Run code") are all fine."""
+    norm = re.sub(r"[\s\-]+", "_", reply.lower())
+    found = {label for label in labels if re.search(rf"(?<![a-z]){re.escape(label)}(?![a-z])", norm)}
+    return found.pop() if len(found) == 1 else None
 
 
 class BackendError(RuntimeError):
@@ -136,11 +166,7 @@ class LLMBackend:
         api_key: str | None = None,
         max_tokens: int = 1024,  # a cap, not a target: reasoning models spend tokens before the JSON
     ):
-        label_lines = "\n".join(f"- {label}: {desc}" for label, desc in task.labels.items())
-        self.system = (
-            f"{task.question}\n\nAllowed labels:\n{label_lines}\n\n"
-            'Reply with JSON only: {"label": "<one allowed label>"}'
-        )
+        self.system = f'{menu_prompt(task)}\n\nReply with JSON only: {{"label": "<one allowed label>"}}'
         self.schema = {
             "type": "object",
             "properties": {"label": {"type": "string", "enum": list(task.labels)}},
@@ -162,9 +188,7 @@ class LLMBackend:
         return {"url": self.base, "model": self.model, "extra": self.extra}
 
     def predict(self, text: str, context: list[str] | None = None) -> dict:
-        if context:
-            turns = "\n".join(f"- {turn}" for turn in context)
-            text = f"Previous turns:\n{turns}\n\nCurrent request:\n{text}"
+        text = request_text(text, context)
         payload = {
             "model": self.model,
             "messages": [{"role": "system", "content": self.system}, {"role": "user", "content": text}],
@@ -187,3 +211,37 @@ class LLMBackend:
         if not isinstance(label, str) or label not in self.labels:
             return {"pred": None, "extra": {"raw": (content or "")[:200]}}
         return {"pred": label}
+
+
+class AnswersBackend:
+    """Replies collected outside the harness, e.g. typed into a chat app from `zsbench prompts`.
+
+    The answers file is that prompts file with "reply" filled in (and optionally "latency_ms").
+    Rows are matched by "key" (task.row_key), so ids can't drift. A row with no reply, or a
+    reply that names no single allowed label, scores invalid.
+    """
+
+    def __init__(self, task: Task, path: str, model: str, name: str):
+        self.path = Path(path)
+        self.model = model
+        self.name = name
+        self.labels = task.labels
+        self.replies: dict[str, dict] = {}
+
+    def check(self) -> None:
+        if not self.path.exists():
+            raise BackendError(f"{self.path} not found")
+        self.replies = {r["key"]: r for r in read_jsonl(self.path) if r.get("reply")}
+
+    def describe(self) -> dict:
+        return {"answers": str(self.path), "model": self.model, "replied": len(self.replies)}
+
+    def predict(self, text: str, context: list[str] | None = None) -> dict:
+        row = self.replies.get(row_key({"text": text, "context": context or []}))
+        if row is None:
+            return {"pred": None, "latency_ms": None, "extra": {"error": "no reply collected"}}
+        return {
+            "pred": parse_label(row["reply"], self.labels),
+            "latency_ms": row.get("latency_ms"),
+            "extra": {"raw": row["reply"][:200]},
+        }
