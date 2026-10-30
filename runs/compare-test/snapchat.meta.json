@@ -1,0 +1,17 @@
+{
+  "backend": "snapchat",
+  "task": "tool_router",
+  "labels": [
+    "answer_directly",
+    "web_search",
+    "read_file",
+    "run_code",
+    "ask_user"
+  ],
+  "split": "test",
+  "n": 27,
+  "finished": "2026-10-30T14:49:26",
+  "answers": "runs\\snapchat\\test.jsonl",
+  "model": "snapchat-my-ai",
+  "replied": 27
+}

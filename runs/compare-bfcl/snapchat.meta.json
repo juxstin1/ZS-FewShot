@@ -1,0 +1,17 @@
+{
+  "backend": "snapchat",
+  "task": "tool_router_bfcl",
+  "labels": [
+    "answer_directly",
+    "web_search",
+    "read_file",
+    "run_code",
+    "ask_user"
+  ],
+  "split": null,
+  "n": 224,
+  "finished": "2026-10-30T15:16:10",
+  "answers": "runs\\snapchat\\bfcl.jsonl",
+  "model": "snapchat-my-ai",
+  "replied": 224
+}

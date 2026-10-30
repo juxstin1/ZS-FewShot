@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from tests.fakes import FakeServer, jev_respond, llm_respond
-from zsbench.backends import BackendError, JevBackend, LLMBackend, RulesBackend
+from zsbench.backends import BackendError, JevBackend, LLMBackend, RulesBackend, chat_prompt, parse_label
 from zsbench.task import load_task, validate
 
 TASK_DIR = Path(__file__).resolve().parent.parent / "tasks" / "tool_router"
@@ -115,6 +115,25 @@ class LLMTest(unittest.TestCase):
         user = server.requests[0]["body"]["messages"][-1]["content"]
         self.assertTrue(user.startswith("Previous turns:\n- assistant: rerun the tests?"))
         self.assertTrue(user.endswith("Current request:\nyes, do it"))
+
+
+class ChatPromptTest(unittest.TestCase):
+    def test_every_prompt_carries_the_full_menu(self):
+        task = load_task(TASK_DIR)
+        for prompt in (chat_prompt(task, "hi"), chat_prompt(task, "yes, do it", ["assistant: rerun the tests?"])):
+            for label, desc in task.labels.items():
+                self.assertIn(f"- {label}: {desc}", prompt)
+            self.assertTrue(prompt.endswith("Reply with only the label, nothing else."))
+        self.assertIn("Current request:\nhi\n", chat_prompt(task, "hi"))
+        self.assertIn("Previous turns:\n- assistant: rerun the tests?", chat_prompt(task, "yes", ["assistant: rerun the tests?"]))
+
+    def test_parse_label_takes_one_named_label_only(self):
+        labels = load_task(TASK_DIR).labels
+        self.assertEqual(parse_label("run_code", labels), "run_code")
+        self.assertEqual(parse_label("`Run code`.", labels), "run_code")
+        self.assertEqual(parse_label("Answer-directly", labels), "answer_directly")
+        self.assertIsNone(parse_label("web search or read file", labels))
+        self.assertIsNone(parse_label("meow", labels))
 
 
 if __name__ == "__main__":

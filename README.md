@@ -199,6 +199,16 @@ python -m zsbench run tasks/tool_router --backends remote --jev-server remote=ht
 
 Each run prints the comparison table and writes `runs/<name>/report.md`, which includes per-label F1 and confusion matrices. A backend whose server is down is skipped and the run exits 1.
 
+To score a chat app with no API (e.g. Snapchat My AI, driven through Claude in Chrome), write one self-contained prompt per row, collect the replies, then score them like any backend:
+
+```bash
+python -m zsbench prompts tasks/tool_router --split dev --out runs/snapchat/dev.jsonl
+# send each "prompt" as its own message; paste the answer into "reply" (optional "latency_ms")
+python -m zsbench run tasks/tool_router --backends snapchat --answers snapchat=runs/snapchat/dev.jsonl,snapchat-my-ai --split dev --out runs/snapchat-dev
+```
+
+Every prompt carries the full label menu, so the app never has to remember options from earlier in the thread. The prompts file has no gold labels. A reply counts if it names exactly one allowed label (case, spaces and backticks don't matter); a missing or ambiguous reply scores invalid. Prompt-wording changes are tuned on dev only.
+
 Useful flags:
 
 | flag | what it does |

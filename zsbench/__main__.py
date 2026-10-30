@@ -1,4 +1,4 @@
-"""CLI: python -m zsbench {check,split,run,report,label,generate,blindcheck,adjudicate,route} ..."""
+"""CLI: python -m zsbench {check,split,prompts,run,report,label,generate,blindcheck,adjudicate,route} ..."""
 
 import argparse
 import hashlib
@@ -11,7 +11,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-from .backends import BackendError, JevBackend, LLMBackend, RulesBackend
+from .backends import AnswersBackend, BackendError, JevBackend, LLMBackend, RulesBackend, chat_prompt
 from .env import ENV_FILE, load_dotenv
 from .report import render
 from .router import Router
@@ -47,20 +47,24 @@ DEFAULT_CHECKERS = "openai/gpt-oss-120b,XiaomiMiMo/MiMo-V2.6-Flash"
 DEFAULT_TIEBREAKER = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
 
 
-def parse_jev_servers(specs: list[str]) -> dict[str, tuple[str, str]]:
-    """--jev-server NAME=URL[,MODEL] -> {name: (url, model)}; the model name defaults to NAME."""
+def parse_named(specs: list[str], flag: str = "--jev-server", what: str = "URL") -> dict[str, tuple[str, str]]:
+    """NAME=URL[,MODEL] (or NAME=FILE[,MODEL]) -> {name: (url, model)}; the model name defaults to NAME."""
     servers = {}
     for spec in specs:
         name, sep, rest = spec.partition("=")
         if not sep or not name or not rest:
-            raise SystemExit(f"--jev-server wants NAME=URL[,MODEL], got {spec!r}")
+            raise SystemExit(f"{flag} wants NAME={what}[,MODEL], got {spec!r}")
         url, _, model = rest.partition(",")
         servers[name.strip()] = (url.strip(), model.strip() or name.strip())
     return servers
 
 
 def make_backend(name: str, task: Task, args: argparse.Namespace):
-    servers = parse_jev_servers(args.jev_server)
+    servers = parse_named(args.jev_server)
+    answers = parse_named(args.answers, "--answers", "FILE")
+    if name in answers:
+        path, model = answers[name]
+        return AnswersBackend(task, path, model, name)
     if name == "rules":
         return RulesBackend(task)
     if name == "jev":
@@ -77,7 +81,7 @@ def make_backend(name: str, task: Task, args: argparse.Namespace):
             timeout=args.timeout,
             api_key=os.environ.get(args.llm_key_env),
         )
-    raise SystemExit(f"unknown backend {name!r} (choose from rules, jev, llm, or a --jev-server name)")
+    raise SystemExit(f"unknown backend {name!r} (choose from rules, jev, llm, or a --jev-server / --answers name)")
 
 
 def _short(row: dict) -> str:
@@ -153,6 +157,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             accepted = accepted_labels(row)
             start = time.perf_counter()
             result = backend.predict(row["text"], context_turns(row))
+            elapsed_ms = (time.perf_counter() - start) * 1000
             pred = {
                 "id": row["id"],
                 "split": row.get("split"),
@@ -162,7 +167,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 "pred": result["pred"],
                 "confidence": result.get("confidence"),
                 "probs": result.get("probs"),
-                "latency_ms": (time.perf_counter() - start) * 1000,
+                "latency_ms": result.get("latency_ms", elapsed_ms),
             }
             if "extra" in result:
                 pred["extra"] = result["extra"]
@@ -190,6 +195,31 @@ def cmd_run(args: argparse.Namespace) -> int:
         print(headline)
         print(f"\nfull report: {out / 'report.md'}")
     return 1 if failed else 0
+
+
+def cmd_prompts(args: argparse.Namespace) -> int:
+    task = load_task(args.task)
+    rows = [row for row in task.gold if not args.split or row.get("split") == args.split]
+    out = Path(args.out)
+    if out.exists():
+        print(f"{out} exists; it may hold collected replies. Pick another --out.", file=sys.stderr)
+        return 1
+    # No gold labels in this file: whoever collects the replies shouldn't see them.
+    lines = [
+        {
+            "id": row["id"],
+            "split": row.get("split"),
+            "key": row_key(row),
+            "prompt": chat_prompt(task, row["text"], context_turns(row)),
+            "reply": None,
+        }
+        for row in rows
+    ]
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("".join(json.dumps(line) + "\n" for line in lines), encoding="utf-8")
+    print(f"{len(lines)} prompts -> {out}")
+    print(f'Fill in each "reply", then: python -m zsbench run {args.task} --backends NAME --answers NAME={out}')
+    return 0
 
 
 def cmd_report(args: argparse.Namespace) -> int:
@@ -410,13 +440,23 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--seed", type=int, default=0)
     p.set_defaults(func=cmd_split)
 
+    p = sub.add_parser("prompts", help="write one self-contained chat prompt per gold row (full label menu "
+                                       "each time, no gold labels) for scoring a chat app")
+    p.add_argument("task")
+    p.add_argument("--split", choices=SPLITS, help="only rows with this split (default: all rows)")
+    p.add_argument("--out", required=True, help="new .jsonl; fill in each reply, then pass it to run --answers")
+    p.set_defaults(func=cmd_prompts)
+
     p = sub.add_parser("run", help="run backends over the gold set and write a report")
     p.add_argument("task")
     p.add_argument("--backends", default="rules,jev,llm",
-                   help="comma-separated: rules, jev, llm, and any --jev-server names")
+                   help="comma-separated: rules, jev, llm, and any --jev-server or --answers names")
     p.add_argument("--jev-server", action="append", default=[], metavar="NAME=URL[,MODEL]",
                    help="another System One server to score as backend NAME (repeatable), "
                         "e.g. kev=http://127.0.0.1:8009,kev-latest")
+    p.add_argument("--answers", action="append", default=[], metavar="NAME=FILE[,MODEL]",
+                   help="score collected replies (a filled-in `prompts` file) as backend NAME (repeatable), "
+                        "e.g. snapchat=runs/snap/dev.jsonl,snapchat-my-ai")
     p.add_argument("--split", choices=SPLITS, help="only rows with this split (default: all rows)")
     p.add_argument("--out", help="run directory; reuse one to add backends run at different times")
     p.add_argument("--limit", type=int, default=0, help="only the first N gold rows")
