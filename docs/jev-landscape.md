@@ -104,7 +104,7 @@ Runs are in `runs/compare-test/` (our test split, n=27) and `runs/compare-bfcl/`
 - **Our test split can't separate the three models.** All got 24 of 27, and the CI spans about 26 points.
 - **BFCL separates them a little:** DeepSeek ≥ Intern > Kev. Its labels are rule-mapped, though, and it has no read_file or ask_user rows.
 - **Both local models depend heavily on order averaging.** Asked once, Intern drops to 67% on our test because a third of its answers change with label order. Kev is steadier, but its BFCL score still falls from 70.5% to 68% when asked once.
-- **The GPU is shared with PROD (AURA).** Every launch went through `scripts/gpu_guard.py`: preflight, a 12 GB cap, and a 2 GB free-VRAM watchdog, one model at a time.
+- **The GPU is shared with production work.** Every launch went through `scripts/gpu_guard.py`: preflight, a 12 GB cap, and a 2 GB free-VRAM watchdog, one model at a time.
   - With graphs on, Kev hit the cap and failed with out-of-memory inside its own process, which is the intended behavior.
   - VRAM is protected, but compute isn't: the GPU showed up to 100% busy during our scoring runs.
 

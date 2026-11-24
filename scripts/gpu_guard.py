@@ -1,6 +1,6 @@
 """Keep benchmark model servers from interfering with PROD workloads on the shared GPU.
 
-LOCKED OUT (2026-10-22): this machine's GPU serves PROD (AURA), so `launch` refuses to start anything
+LOCKED OUT (2026-10-22): this machine's GPU serves production work, so `launch` refuses to start anything
 while LOCKOUT is set. Lifting it is a deliberate edit here, on a GPU without PROD, not a flag.
 
   check   preflight only: is there room for a model of --need-gb while leaving --reserve-gb free?
@@ -27,7 +27,7 @@ import time
 GB = 1024  # nvidia-smi reports MiB
 
 LOCKOUT = (
-    "local model servers are locked out on this machine: its GPU serves PROD (AURA). The router runs on "
+    "local model servers are locked out on this machine: its GPU serves production work. The router runs on "
     "DeepSeek via API. See README, 'Model servers: local GPU locked out'."
 )
 

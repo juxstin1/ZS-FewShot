@@ -15,7 +15,7 @@ Zero-shot and few-shot classifiers for agent decisions (routing, gates, judging)
 
 ## Decisions
 
-- [2026-10-22] **No local model servers on this machine's GPU** (shared with PROD AURA). `gpu_guard.py launch` is locked out (exit 4), and the README launch commands are removed. Lifting it is a code edit on a GPU without PROD.
+- [2026-10-22] **No local model servers on this machine's GPU** (shared with production work). `gpu_guard.py launch` is locked out (exit 4), and the README launch commands are removed. Lifting it is a code edit on a GPU without PROD.
 - [2026-10-22] **The router is DeepSeek V4.1 Flash on DeepInfra** (`zsbench/router.py`, `python -m zsbench route`). Justin's pick: best on BFCL (78.6% vs Intern 75.4% and Kev 70.5%), tied on our test split, and no load on the PROD GPU. Fallback is `answer_directly` after one retry.
 
 - [2026-10-22] Generators and teachers: DeepInfra open models plus the Claude API (Haiku 5.5 bulk, Sonnet 5.5 edge cases), mixed across generators. This supersedes the earlier "open-weight only, no Claude" rule; Justin reversed it.

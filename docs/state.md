@@ -29,7 +29,7 @@
   | rules | 55.6% | 46.0% | – |
 
   - Local models need label-order averaging (asked once, Intern scores 67% on test).
-  - **[2026-10-22] Local model servers are LOCKED OUT on this machine** (its GPU serves PROD AURA).
+  - **[2026-10-22] Local model servers are LOCKED OUT on this machine** (its GPU serves production work).
     - `gpu_guard.py launch` exits 4, and `intern_server.py` refuses to start.
     - The README launch commands are removed; they're in git history at `1b3edb3`.
     - The `servers/` folder stays on disk but unused.
